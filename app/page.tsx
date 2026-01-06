@@ -9,10 +9,12 @@ import CalendarBoard from "@/components/CalendarBoard";
 import TodoPanel from "@/components/TodoPanel";
 import { LanguageProvider, useTranslation } from "@/contexts/LanguageContext";
 
+import DailyQuote from "@/components/DailyQuote";
+
 function JournalApp() {
 	const { currentDate, selectedDate, calendarDays, nextMonth, prevMonth, selectDate } = useCalendar();
 
-	const { todos, addTodo, toggleTodo, deleteTodo, getTodosByDate, isLoaded } = useTodos();
+	const { todos, addTodo, toggleTodo, deleteTodo, editTodo, getTodosByDate, isLoaded } = useTodos();
 	const { t, language, setLanguage } = useTranslation();
 
 	const [direction, setDirection] = useState(0);
@@ -38,8 +40,8 @@ function JournalApp() {
 	const selectedDateTodos = getTodosByDate(format(selectedDate, "yyyy-MM-dd"));
 
 	return (
-		<main className="min-h-screen pt-12 pb-12 px-4 flex flex-col overflow-hidden">
-			<header className="max-w-4xl mx-auto w-full flex items-center justify-between mb-12 relative z-10">
+		<main className="h-screen py-6 px-4 flex flex-col overflow-hidden">
+			<header className="max-w-4xl mx-auto w-full flex items-center justify-between mb-4 relative z-10 shrink-0">
 				<div className="flex items-center gap-6">
 					<button onClick={handlePrev} className="text-[#4F6D7A]/50 hover:text-[#4F6D7A] transition-colors p-2 text-xl font-serif">
 						←
@@ -57,11 +59,13 @@ function JournalApp() {
 				</button>
 			</header>
 
-			<section className="flex-1">
+			<section className="flex-1 flex flex-col justify-center">
 				<CalendarBoard currentDate={currentDate} selectedDate={selectedDate} calendarDays={calendarDays} todos={todos} onSelectDate={handleDateClick} direction={direction} />
 			</section>
 
-			<AnimatePresence>{isPanelOpen && <TodoPanel date={selectedDate} todos={selectedDateTodos} onAdd={addTodo} onToggle={toggleTodo} onDelete={deleteTodo} onClose={() => setIsPanelOpen(false)} />}</AnimatePresence>
+			<DailyQuote />
+
+			<AnimatePresence>{isPanelOpen && <TodoPanel date={selectedDate} todos={selectedDateTodos} onAdd={addTodo} onToggle={toggleTodo} onDelete={deleteTodo} onEdit={editTodo} onClose={() => setIsPanelOpen(false)} />}</AnimatePresence>
 		</main>
 	);
 }

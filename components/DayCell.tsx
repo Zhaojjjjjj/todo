@@ -15,7 +15,7 @@ export default function DayCell({ date, currentDate, isSelected, hasTodos, allCo
 	const isTodayDate = isToday(date);
 
 	if (!isCurrentMonth) {
-		return <div className="h-24 md:h-32 bg-transparent" />; // Empty placeholder or faded info for non-current month
+		return <div className="bg-transparent" style={{ height: "10vh", maxHeight: "120px", minHeight: "60px" }} />; // Empty placeholder or faded info for non-current month
 	}
 
 	return (
@@ -23,8 +23,9 @@ export default function DayCell({ date, currentDate, isSelected, hasTodos, allCo
 			whileHover={{ y: -2, boxShadow: "0 4px 12px rgba(0,0,0,0.05)" }}
 			whileTap={{ scale: 0.98 }}
 			onClick={() => onClick(date)}
+			style={{ height: "10vh", maxHeight: "120px", minHeight: "60px" }}
 			className={`
-        relative h-24 md:h-32 p-3 rounded-xl border transition-all cursor-pointer flex flex-col justify-between
+        relative p-2 rounded-xl border transition-all cursor-pointer flex flex-col justify-between
         ${isSelected ? "bg-white border-[#4F6D7A] ring-1 ring-[#4F6D7A] shadow-lg" : "bg-white/60 border-transparent hover:bg-white hover:border-gray-100"}
       `}>
 			<div className="flex justify-between items-start">

@@ -58,9 +58,20 @@ export default function CalendarBoard({ currentDate, selectedDate, calendarDays,
 				))}
 			</div>
 
-			<div className="relative overflow-visible" style={{ minHeight: "500px" }}>
+			{/* 
+				Calculate height based on viewport height (vh) to ensure it fits in a single screen.
+				Row height set to 10vh in DayCell.
+				Gap is small (0.5rem - 1rem). 
+				Estimated per row: 10vh + gap ≈ 11vh
+			*/}
+			<div
+				className="relative overflow-visible transition-all duration-300 ease-in-out"
+				style={{
+					height: `calc(${Math.ceil(calendarDays.length / 7)} * 11vh)`,
+					minHeight: `calc(${Math.ceil(calendarDays.length / 7)} * 11vh)`,
+				}}>
 				<AnimatePresence initial={false} custom={direction} mode="wait">
-					<motion.div key={currentDate.toString()} custom={direction} variants={variants} initial="enter" animate="center" exit="exit" className="grid grid-cols-7 gap-2 md:gap-4 absolute w-full top-0 left-0 backface-hidden" style={{ transformStyle: "preserve-3d" }}>
+					<motion.div key={currentDate.toString()} custom={direction} variants={variants} initial="enter" animate="center" exit="exit" className="grid grid-cols-7 gap-2 md:gap-3 absolute w-full top-0 left-0 backface-hidden" style={{ transformStyle: "preserve-3d" }}>
 						{calendarDays.map((day, idx) => {
 							const { hasTodos, allCompleted } = getDayStatus(day);
 							// Check if selected
