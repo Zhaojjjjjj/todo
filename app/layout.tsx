@@ -1,10 +1,5 @@
-import type { Metadata } from "next";
 import "./globals.css";
-
-export const metadata: Metadata = {
-	title: "My Todo App",
-	description: "A simple, persistent todo application",
-};
+import { Providers } from "@/components/Providers";
 
 export default function RootLayout({
 	children,
@@ -12,9 +7,9 @@ export default function RootLayout({
 	children: React.ReactNode;
 }>) {
 	return (
-		<html lang="en">
+		<html lang="zh">
 			<body className="antialiased" suppressHydrationWarning>
-				{children}
+				<Providers>{children}</Providers>
 			</body>
 		</html>
 	);
