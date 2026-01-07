@@ -2,6 +2,11 @@ import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
 
+// Force allow self-signed certificates (common issue with some Supabase/Vercel setups)
+if (process.env.NODE_ENV === "production" || process.env.DATABASE_URL?.includes("supabase")) {
+	process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+}
+
 const globalForPrisma = global as unknown as { prisma: PrismaClient };
 
 const pool = new Pool({
