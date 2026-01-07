@@ -19,9 +19,11 @@ export default function CalendarBoard({ currentDate, selectedDate, calendarDays,
 	const getDayStatus = (date: Date) => {
 		const dateStr = format(date, "yyyy-MM-dd");
 		const dayTodos = todos.filter((t) => t.date === dateStr);
-		const hasTodos = dayTodos.length > 0;
-		const allCompleted = hasTodos && dayTodos.every((t) => t.completed);
-		return { hasTodos, allCompleted };
+		const totalCount = dayTodos.length;
+		const completedCount = dayTodos.filter((t) => t.completed).length;
+		const hasTodos = totalCount > 0;
+		const allCompleted = hasTodos && totalCount === completedCount;
+		return { hasTodos, allCompleted, totalCount, completedCount };
 	};
 
 	const variants = {
@@ -73,11 +75,11 @@ export default function CalendarBoard({ currentDate, selectedDate, calendarDays,
 				<AnimatePresence initial={false} custom={direction} mode="wait">
 					<motion.div key={currentDate.toString()} custom={direction} variants={variants} initial="enter" animate="center" exit="exit" className="grid grid-cols-7 gap-2 md:gap-3 absolute w-full top-0 left-0 backface-hidden" style={{ transformStyle: "preserve-3d" }}>
 						{calendarDays.map((day, idx) => {
-							const { hasTodos, allCompleted } = getDayStatus(day);
+							const { hasTodos, allCompleted, totalCount, completedCount } = getDayStatus(day);
 							// Check if selected
 							const isSelected = format(day, "yyyy-MM-dd") === format(selectedDate, "yyyy-MM-dd");
 
-							return <DayCell key={day.toISOString()} date={day} currentDate={currentDate} isSelected={isSelected} onClick={onSelectDate} hasTodos={hasTodos} allCompleted={allCompleted} />;
+							return <DayCell key={day.toISOString()} date={day} currentDate={currentDate} isSelected={isSelected} onClick={onSelectDate} hasTodos={hasTodos} allCompleted={allCompleted} totalCount={totalCount} completedCount={completedCount} />;
 						})}
 					</motion.div>
 				</AnimatePresence>

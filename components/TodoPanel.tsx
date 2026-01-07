@@ -1,9 +1,9 @@
 import { useState, useRef, useEffect } from "react";
 import { format } from "date-fns";
+import { zhCN } from "date-fns/locale";
 import { motion, AnimatePresence } from "framer-motion";
 import { Todo } from "@/types";
-import { useTranslation } from "@/contexts/LanguageContext";
-import Input from "./ui/Input";
+import Textarea from "./ui/Textarea";
 
 interface TodoPanelProps {
 	date: Date;
@@ -19,8 +19,8 @@ export default function TodoPanel({ date, todos, onAdd, onToggle, onDelete, onEd
 	const [text, setText] = useState("");
 	const [editingId, setEditingId] = useState<string | null>(null);
 	const [editText, setEditText] = useState("");
+	const [deletingId, setDeletingId] = useState<string | null>(null);
 
-	const { t } = useTranslation();
 	const formattedDate = format(date, "yyyy-MM-dd");
 
 	const handleSubmit = (e: React.FormEvent) => {
@@ -48,24 +48,29 @@ export default function TodoPanel({ date, todos, onAdd, onToggle, onDelete, onEd
 		setEditText("");
 	};
 
+	const handleDelete = (id: string) => {
+		onDelete(id);
+		setDeletingId(null);
+	};
+
 	return (
 		<>
 			<motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} className="fixed inset-0 bg-black/20 backdrop-blur-[2px] z-40" />
 			<motion.div initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ type: "spring", damping: 30, stiffness: 300 }} className="fixed right-0 top-0 bottom-0 w-full max-w-md bg-[#F6F5F3] paper-texture shadow-2xl z-50 p-8 border-l border-white/50 flex flex-col">
 				<div className="flex justify-between items-end mb-8 border-b border-[#4F6D7A]/10 pb-4">
 					<div>
-						<h2 className="text-3xl font-serif font-bold text-[#1E1F24]">{format(date, "MMMM d")}</h2>
-						<p className="text-[#4F6D7A] text-sm font-medium mt-1">{format(date, "EEEE")}</p>
+						<h2 className="text-3xl font-serif font-bold text-[#1E1F24]">{format(date, "M月d日", { locale: zhCN })}</h2>
+						<p className="text-[#4F6D7A] text-sm font-medium mt-1">{format(date, "EEEE", { locale: zhCN })}</p>
 					</div>
 					<button onClick={onClose} className="p-2 hover:bg-[#4F6D7A]/10 rounded-full transition-colors text-[#4F6D7A]">
-						<span className="sr-only">Close</span>✕
+						<span className="sr-only">关闭</span>✕
 					</button>
 				</div>
 
 				<div className="flex-1 overflow-y-auto mb-6 pr-2">
 					{todos.length === 0 ? (
 						<div className="h-full flex flex-col items-center justify-center text-[#4F6D7A]/40">
-							<p className="font-serif italic text-lg">No entries yet...</p>
+							<p className="font-serif italic text-lg">暂无待办事项...</p>
 						</div>
 					) : (
 						<ul className="space-y-3">
@@ -75,20 +80,23 @@ export default function TodoPanel({ date, todos, onAdd, onToggle, onDelete, onEd
 
 									<div className="flex-1">
 										{editingId === todo.id ? (
-											<input
-												type="text"
+											<Textarea
 												value={editText}
 												onChange={(e) => setEditText(e.target.value)}
 												onBlur={() => saveEdit(todo.id)}
 												onKeyDown={(e) => {
-													if (e.key === "Enter") saveEdit(todo.id);
+													if (e.key === "Enter" && !e.shiftKey) {
+														e.preventDefault();
+														saveEdit(todo.id);
+													}
 													if (e.key === "Escape") cancelEdit();
 												}}
 												className="w-full bg-transparent border-b border-[#4F6D7A] focus:outline-none text-base leading-relaxed text-[#1E1F24]"
+												variant="ghost"
 												autoFocus
 											/>
 										) : (
-											<span onClick={() => !todo.completed && startEditing(todo)} className={`block text-base leading-relaxed cursor-pointer ${todo.completed ? "text-[#4F6D7A]/50 line-through" : "text-[#1E1F24] hover:text-[#4F6D7A]"}`} title="Click to edit">
+											<span onClick={() => !todo.completed && startEditing(todo)} className={`block text-base leading-relaxed cursor-pointer ${todo.completed ? "text-[#4F6D7A]/50 line-through" : "text-[#1E1F24] hover:text-[#4F6D7A]"}`} title="点击编辑">
 												{todo.text}
 											</span>
 										)}
@@ -104,7 +112,7 @@ export default function TodoPanel({ date, todos, onAdd, onToggle, onDelete, onEd
 												</svg>
 											</button>
 										)}
-										<button onClick={() => onDelete(todo.id)} className="text-[#c97c5d] hover:text-[#c97c5d]/80 p-1">
+										<button onClick={() => setDeletingId(todo.id)} className="text-[#c97c5d] hover:text-[#c97c5d]/80 p-1">
 											<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
 												<path d="M18 6L6 18M6 6l12 12" />
 											</svg>
@@ -117,12 +125,51 @@ export default function TodoPanel({ date, todos, onAdd, onToggle, onDelete, onEd
 				</div>
 
 				<form onSubmit={handleSubmit} className="mt-auto relative">
-					<Input value={text} onChange={(e) => setText(e.target.value)} placeholder={t.inputPlaceholder} variant="bordered" className="bg-white/80" autoFocus />
+					<Textarea
+						value={text}
+						onChange={(e) => setText(e.target.value)}
+						onKeyDown={(e) => {
+							if (e.key === "Enter" && !e.shiftKey) {
+								e.preventDefault();
+								handleSubmit(e as unknown as React.FormEvent);
+							}
+						}}
+						placeholder="记下今天的事..."
+						variant="bordered"
+						className="bg-white/80"
+						autoFocus
+					/>
 					<button type="submit" className={`absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-lg transition-all ${text.trim() ? "text-[#4F6D7A] hover:bg-[#4F6D7A]/10" : "text-gray-300 cursor-default"}`} disabled={!text.trim()}>
 						→
 					</button>
 				</form>
 			</motion.div>
+
+			{/* Delete Confirmation Modal */}
+			<AnimatePresence>
+				{deletingId && (
+					<>
+						<motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setDeletingId(null)} className="fixed inset-0 bg-black/40 backdrop-blur-md z-[60]" />
+						<motion.div initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 20 }} className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-sm bg-white rounded-3xl p-8 shadow-2xl z-[70] text-center">
+							<div className="w-16 h-16 bg-[#C97C5D]/10 rounded-full flex items-center justify-center mx-auto mb-6">
+								<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#C97C5D" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+									<path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6" />
+								</svg>
+							</div>
+							<h3 className="text-xl font-semibold text-[#1E1F24] mb-2">确认删除？</h3>
+							<p className="text-[#4F6D7A]/70 mb-8 leading-relaxed">这一条记录将会被永久移除，无法撤销。</p>
+							<div className="flex gap-3">
+								<button onClick={() => setDeletingId(null)} className="flex-1 py-3 px-6 rounded-2xl bg-gray-100 text-gray-600 font-semibold hover:bg-gray-200 transition-colors">
+									取消
+								</button>
+								<button onClick={() => handleDelete(deletingId)} className="flex-1 py-3 px-6 rounded-2xl bg-[#C97C5D] text-white font-semibold hover:bg-[#C97C5D]/90 transition-colors shadow-lg shadow-[#C97C5D]/20">
+									确认删除
+								</button>
+							</div>
+						</motion.div>
+					</>
+				)}
+			</AnimatePresence>
 		</>
 	);
 }

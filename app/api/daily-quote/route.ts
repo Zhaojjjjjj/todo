@@ -2,22 +2,35 @@ import { NextResponse } from "next/server";
 
 export async function GET() {
 	try {
-		// Fetch from Hitokoto API (https://developer.hitokoto.cn/sentence/)
-		// c=i (Literature), c=d (Literature), c=k (Philosophy)
-		const res = await fetch("https://v1.hitokoto.cn/?c=i&c=d&c=k", {
-			next: { revalidate: 3600 * 24 }, // Cache for 24 hours
-		});
+		const isChinese = Math.random() > 0.5;
 
-		if (!res.ok) {
-			throw new Error("Failed to fetch quote");
+		if (isChinese) {
+			// Fetch from Hitokoto API (https://developer.hitokoto.cn/sentence/)
+			const res = await fetch("https://v1.hitokoto.cn/?c=i&c=d&c=k", {
+				cache: "no-store",
+			});
+
+			if (!res.ok) throw new Error("Failed to fetch Chinese quote");
+
+			const data = await res.json();
+			return NextResponse.json({
+				content: data.hitokoto,
+				author: data.from_who || data.from || "佚名",
+			});
+		} else {
+			// Fetch from Quotable API
+			const res = await fetch("https://api.quotable.io/random", {
+				cache: "no-store",
+			});
+
+			if (!res.ok) throw new Error("Failed to fetch English quote");
+
+			const data = await res.json();
+			return NextResponse.json({
+				content: data.content,
+				author: data.author,
+			});
 		}
-
-		const data = await res.json();
-
-		return NextResponse.json({
-			content: data.hitokoto,
-			author: data.from_who || data.from,
-		});
 	} catch (error) {
 		console.error("Daily quote fetch error:", error);
 		// Fallback quote

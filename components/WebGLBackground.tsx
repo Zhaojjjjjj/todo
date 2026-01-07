@@ -103,17 +103,25 @@ const WebGLBackground: React.FC = () => {
         vec2 st = gl_FragCoord.xy / uResolution.xy;
         st.x *= uResolution.x / uResolution.y;
 
-        float noise = snoise(vec3(st * 1.5, uTime * 0.1));
+        // Use multiple layers of noise for more complexity
+        float n1 = snoise(vec3(st * 1.5, uTime * 0.05));
+        float n2 = snoise(vec3(st * 3.0, uTime * 0.08));
+        float noise = n1 * 0.6 + n2 * 0.4;
         
-        vec3 color1 = vec3(0.05, 0.05, 0.1); // Deep Navy
-        vec3 color2 = vec3(0.1, 0.2, 0.4);   // Royal Blue
-        vec3 color3 = vec3(0.3, 0.1, 0.5);   // Purple Deep
+        // Sophisticated, warm palette
+        vec3 paperBase = vec3(0.965, 0.96, 0.95); // #F6F5F3 Premium Paper
+        vec3 secondary = vec3(0.93, 0.92, 0.90); // Slightly darker warm gray
+        vec3 accent = vec3(0.88, 0.90, 0.92);    // Subtle cool hint
         
         float dist = distance(vUv, uMouse);
-        float mouseEffect = 1.0 - smoothstep(0.0, 0.8, dist);
+        float mouseEffect = 1.0 - smoothstep(0.0, 0.6, dist);
 
-        vec3 finalColor = mix(color1, color2, noise * 0.5 + 0.5);
-        finalColor = mix(finalColor, color3, mouseEffect * 0.4);
+        vec3 finalColor = mix(paperBase, secondary, noise * 0.3 + 0.3);
+        finalColor = mix(finalColor, accent, mouseEffect * 0.1);
+        
+        // Add subtle grain/texture
+        float grain = (fract(sin(dot(vUv, vec2(12.9898,78.233))) * 43758.5453) - 0.5) * 0.05;
+        finalColor += grain;
         
         gl_FragColor = vec4(finalColor, 1.0);
       }

@@ -3,7 +3,6 @@
 import { useEffect, useRef } from "react";
 import { Todo } from "@/types";
 import TodoItem from "./TodoItem";
-import { useTranslation } from "@/contexts/LanguageContext";
 import gsap from "gsap";
 
 interface TodoListProps {
@@ -14,7 +13,6 @@ interface TodoListProps {
 }
 
 export default function TodoList({ todos, onToggle, onDelete, onEdit }: TodoListProps) {
-	const { t } = useTranslation();
 	const listRef = useRef<HTMLUListElement>(null);
 
 	useEffect(() => {
@@ -38,8 +36,8 @@ export default function TodoList({ todos, onToggle, onDelete, onEdit }: TodoList
 	if (todos.length === 0) {
 		return (
 			<div className="text-center py-20 cinematic-glass rounded-[2.5rem] animate-pulse">
-				<p className="text-gray-400 text-2xl font-thin tracking-[0.2em] uppercase">{t.noTasks}</p>
-				<p className="text-purple-500/50 text-sm mt-4 tracking-widest uppercase">{t.startAdding}</p>
+				<p className="text-gray-400 text-2xl font-thin tracking-[0.2em] uppercase">暂无任务</p>
+				<p className="text-purple-500/50 text-sm mt-4 tracking-widest uppercase">从添加一个任务开始吧</p>
 			</div>
 		);
 	}

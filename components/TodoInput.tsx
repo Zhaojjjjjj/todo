@@ -1,9 +1,7 @@
 "use client";
 
 import { useState, FormEvent, useRef, useEffect } from "react";
-import { useTranslation } from "@/contexts/LanguageContext";
-import gsap from "gsap";
-import Input from "./ui/Input";
+import Textarea from "./ui/Textarea";
 import Button from "./ui/Button";
 
 interface TodoInputProps {
@@ -12,7 +10,6 @@ interface TodoInputProps {
 
 export default function TodoInput({ onAdd }: TodoInputProps) {
 	const [text, setText] = useState("");
-	const { t } = useTranslation();
 	const containerRef = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
@@ -27,14 +24,21 @@ export default function TodoInput({ onAdd }: TodoInputProps) {
 		}
 	};
 
+	const handleKeyDown = (e: React.KeyboardEvent) => {
+		if (e.key === "Enter" && !e.shiftKey) {
+			e.preventDefault();
+			handleSubmit(e as unknown as FormEvent);
+		}
+	};
+
 	return (
 		<div ref={containerRef} className="mb-12 w-full max-w-lg mx-auto">
 			<form onSubmit={handleSubmit} className="flex items-end gap-3">
 				<div className="flex-1">
-					<Input value={text} onChange={(e) => setText(e.target.value)} placeholder={t.inputPlaceholder} variant="journal" />
+					<Textarea value={text} onChange={(e) => setText(e.target.value)} onKeyDown={handleKeyDown} placeholder="有什么计划？" variant="journal" />
 				</div>
 				<Button type="submit" disabled={!text.trim()} variant="primary" className="min-w-[100px]">
-					{t.add}
+					添加
 				</Button>
 			</form>
 		</div>

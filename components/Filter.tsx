@@ -2,7 +2,6 @@
 
 import { useEffect, useRef } from "react";
 import { FilterType } from "@/types";
-import { useTranslation } from "@/contexts/LanguageContext";
 import gsap from "gsap";
 
 interface FilterProps {
@@ -11,13 +10,12 @@ interface FilterProps {
 }
 
 export default function Filter({ currentFilter, onFilterChange }: FilterProps) {
-	const { t } = useTranslation();
 	const containerRef = useRef<HTMLDivElement>(null);
 
 	const filters: { value: FilterType; label: string }[] = [
-		{ value: "all", label: t.all },
-		{ value: "active", label: t.active },
-		{ value: "completed", label: t.completed },
+		{ value: "all" as FilterType, label: "全部" },
+		{ value: "active" as FilterType, label: "待办" },
+		{ value: "completed" as FilterType, label: "已完成" },
 	];
 
 	useEffect(() => {
